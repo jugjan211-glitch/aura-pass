@@ -276,3 +276,9 @@
   .delay-400 { animation-delay: 400ms; }
   .delay-500 { animation-delay: 500ms; }
 }
+
+/* No glass mode */
+.no-glass .glass,
+.no-glass .glass-strong {
+  @apply bg-card backdrop-blur-none;
+}

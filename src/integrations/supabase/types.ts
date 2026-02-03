@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      breach_checks: {
+        Row: {
+          breach_count: number
+          checked_at: string
+          id: string
+          is_breached: boolean
+          password_hash: string
+          user_id: string
+        }
+        Insert: {
+          breach_count?: number
+          checked_at?: string
+          id?: string
+          is_breached?: boolean
+          password_hash: string
+          user_id: string
+        }
+        Update: {
+          breach_count?: number
+          checked_at?: string
+          id?: string
+          is_breached?: boolean
+          password_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      passwords: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          last_used: string | null
+          notes: string | null
+          password: string
+          strength: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          url: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          last_used?: string | null
+          notes?: string | null
+          password: string
+          strength?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          last_used?: string | null
+          notes?: string | null
+          password?: string
+          strength?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      secure_notes: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          accent_color: string
+          auto_lock_enabled: boolean
+          auto_lock_timeout: number
+          border_radius: string
+          created_at: string
+          font_size: string
+          glass_effect: boolean
+          id: string
+          preset_theme: string | null
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          auto_lock_enabled?: boolean
+          auto_lock_timeout?: number
+          border_radius?: string
+          created_at?: string
+          font_size?: string
+          glass_effect?: boolean
+          id?: string
+          preset_theme?: string | null
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          auto_lock_enabled?: boolean
+          auto_lock_timeout?: number
+          border_radius?: string
+          created_at?: string
+          font_size?: string
+          glass_effect?: boolean
+          id?: string
+          preset_theme?: string | null
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
