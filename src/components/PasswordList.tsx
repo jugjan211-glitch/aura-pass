@@ -19,12 +19,13 @@ interface PasswordListProps {
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onCopy: (id: string) => void;
+  onShare?: (entry: PasswordEntry) => void;
 }
 
 type SortOption = 'newest' | 'oldest' | 'name' | 'strength';
 type FilterStrength = 'all' | 'weak' | 'medium' | 'strong';
 
-export function PasswordList({ passwords, onEdit, onDelete, onToggleFavorite, onCopy }: PasswordListProps) {
+export function PasswordList({ passwords, onEdit, onDelete, onToggleFavorite, onCopy, onShare }: PasswordListProps) {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
@@ -224,6 +225,7 @@ export function PasswordList({ passwords, onEdit, onDelete, onToggleFavorite, on
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
               onCopy={onCopy}
+              onShare={onShare}
             />
           </div>
         ))}

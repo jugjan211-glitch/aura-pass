@@ -11,6 +11,7 @@ import { LockScreen } from "@/components/LockScreen";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import SharedPassword from "./pages/SharedPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function AppContent() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/shared/:token" element={<SharedPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
