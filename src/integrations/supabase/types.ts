@@ -152,6 +152,69 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_passwords: {
+        Row: {
+          created_at: string
+          encrypted_data: string
+          expires_at: string
+          id: string
+          max_views: number
+          password_id: string
+          share_token: string
+          shared_by: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          encrypted_data: string
+          expires_at: string
+          id?: string
+          max_views?: number
+          password_id: string
+          share_token: string
+          shared_by: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          encrypted_data?: string
+          expires_at?: string
+          id?: string
+          max_views?: number
+          password_id?: string
+          share_token?: string
+          shared_by?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      totp_secrets: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          secret: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          secret: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          secret?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           accent_color: string

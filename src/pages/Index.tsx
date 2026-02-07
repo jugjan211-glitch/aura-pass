@@ -5,6 +5,7 @@ import { PasswordGenerator } from '@/components/PasswordGenerator';
 import { QuickActionsPanel } from '@/components/QuickActionsPanel';
 import { PasswordList } from '@/components/PasswordList';
 import { AddPasswordModal } from '@/components/AddPasswordModal';
+import { SharePasswordModal } from '@/components/SharePasswordModal';
 import { SecurityDashboard } from '@/components/SecurityDashboard';
 import { SecureNotes } from '@/components/SecureNotes';
 import { BreachChecker } from '@/components/BreachChecker';
@@ -33,6 +34,7 @@ export default function Index() {
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('passwords');
+  const [shareEntry, setShareEntry] = useState<PasswordEntry | null>(null);
 
   const weakPasswordCount = passwords.filter(p => p.strength === 'weak').length;
   const favoriteCount = passwords.filter(p => p.isFavorite).length;
@@ -52,7 +54,7 @@ export default function Index() {
     setIsModalOpen(true);
   }, []);
 
-  const handleSave = useCallback((entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'storageType'>) => {
+  const handleSave = useCallback((entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'storageType'> & { storageType?: 'local' | 'cloud' }) => {
     if (editEntry) {
       updatePassword(editEntry.id, entry);
       toast.success('Password updated successfully');
@@ -79,6 +81,14 @@ export default function Index() {
     markAsUsed(id);
   }, [markAsUsed]);
 
+  const handleShare = useCallback((entry: PasswordEntry) => {
+    if (!user) {
+      toast.error('Sign in to share passwords');
+      return;
+    }
+    setShareEntry(entry);
+  }, [user]);
+
   return (
     <div className="min-h-screen flex flex-col gradient-hero">
       <Header />
@@ -86,9 +96,7 @@ export default function Index() {
       <main className="flex-1">
         <HeroSection />
 
-        {/* Main Content */}
         <section className="container mx-auto px-4 pb-16">
-          {/* Generator & Quick Actions */}
           <div className="grid lg:grid-cols-2 gap-6 mb-12">
             <PasswordGenerator onPasswordGenerated={handlePasswordGenerated} />
             <QuickActionsPanel 
@@ -99,27 +107,22 @@ export default function Index() {
             />
           </div>
 
-          {/* Security Dashboard */}
           {passwords.length > 0 && (
             <div className="mb-12">
               <SecurityDashboard passwords={passwords} />
             </div>
           )}
 
-          {/* Tabbed Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="glass h-12 p-1 w-full sm:w-auto">
               <TabsTrigger value="passwords" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <Key className="h-4 w-4" />
-                Passwords
+                <Key className="h-4 w-4" /> Passwords
               </TabsTrigger>
               <TabsTrigger value="notes" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <FileText className="h-4 w-4" />
-                Secure Notes
+                <FileText className="h-4 w-4" /> Secure Notes
               </TabsTrigger>
               <TabsTrigger value="breach" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <ShieldAlert className="h-4 w-4" />
-                Breach Check
+                <ShieldAlert className="h-4 w-4" /> Breach Check
               </TabsTrigger>
             </TabsList>
 
@@ -131,6 +134,7 @@ export default function Index() {
                 onDelete={handleDelete}
                 onToggleFavorite={toggleFavorite}
                 onCopy={handleCopy}
+                onShare={handleShare}
               />
             </TabsContent>
 
@@ -149,16 +153,18 @@ export default function Index() {
 
       <Footer />
 
-      {/* Modals */}
       <AddPasswordModal
         open={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditEntry(null);
-        }}
+        onClose={() => { setIsModalOpen(false); setEditEntry(null); }}
         onSave={handleSave}
         editEntry={editEntry}
         generatedPassword={generatedPassword}
+      />
+
+      <SharePasswordModal
+        open={!!shareEntry}
+        onClose={() => setShareEntry(null)}
+        entry={shareEntry}
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
