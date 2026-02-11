@@ -7,6 +7,84 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// --- AES-GCM encryption helpers using SERVICE_ROLE_KEY as master key ---
+
+async function getEncryptionKey(): Promise<CryptoKey> {
+  const masterKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(masterKey),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+  // Use a fixed salt derived from the project context
+  const salt = encoder.encode("totp-secret-encryption-salt-v1");
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptSecret(plaintext: string): Promise<string> {
+  const key = await getEncryptionKey();
+  const encoder = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoder.encode(plaintext)
+  );
+  // Pack iv + ciphertext as base64 JSON
+  const toBase64 = (buf: ArrayBuffer) => {
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  };
+  return JSON.stringify({
+    iv: toBase64(iv.buffer),
+    ct: toBase64(encrypted),
+  });
+}
+
+async function decryptSecret(encryptedBundle: string): Promise<string> {
+  // Handle legacy unencrypted secrets (plain base32 strings)
+  try {
+    const parsed = JSON.parse(encryptedBundle);
+    if (!parsed.iv || !parsed.ct) {
+      // Not encrypted format, return as-is (legacy)
+      return encryptedBundle;
+    }
+    const fromBase64 = (b64: string) => {
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes.buffer;
+    };
+    const key = await getEncryptionKey();
+    const iv = new Uint8Array(fromBase64(parsed.iv));
+    const ciphertext = fromBase64(parsed.ct);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      ciphertext
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    // If JSON parse fails, it's a legacy plain base32 secret
+    return encryptedBundle;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -88,13 +166,16 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Save to database (server-side, validated)
+      // Encrypt the secret before storing
+      const encryptedSecret = await encryptSecret(secret);
+
+      // Save encrypted secret to database
       const { error: dbError } = await adminClient
         .from("totp_secrets")
         .upsert(
           {
             user_id: user.id,
-            secret: secret,
+            secret: encryptedSecret,
             is_enabled: true,
           },
           { onConflict: "user_id" }
@@ -113,6 +194,56 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (action === "verify") {
+      // Verify a TOTP code against stored (encrypted) secret
+      if (!code || typeof code !== "string" || !/^\d{6}$/.test(code)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid code format" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const { data: totpData, error: fetchError } = await adminClient
+        .from("totp_secrets")
+        .select("secret, is_enabled")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (fetchError || !totpData || !totpData.is_enabled) {
+        return new Response(
+          JSON.stringify({ error: "2FA not enabled" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Decrypt the stored secret
+      const decryptedSecret = await decryptSecret(totpData.secret);
+
+      const totp = new TOTP({
+        issuer: "SecureVault",
+        label: user.email || "user",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: Secret.fromBase32(decryptedSecret),
+      });
+
+      const delta = totp.validate({ token: code, window: 1 });
+
+      return new Response(
+        JSON.stringify({ valid: delta !== null }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     if (action === "disable") {
@@ -140,7 +271,7 @@ Deno.serve(async (req) => {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
+  } catch {
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
