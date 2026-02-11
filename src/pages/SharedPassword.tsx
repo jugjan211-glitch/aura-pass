@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Shield, Copy, Check, Eye, EyeOff, Loader2, AlertTriangle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { decryptData, isLegacyEncryption, decodeLegacy } from '@/lib/crypto';
 
 interface SharedData {
   title: string;
@@ -27,40 +28,38 @@ export default function SharedPassword() {
   }, [token]);
 
   const loadShared = async () => {
+    if (!token) return;
     setIsLoading(true);
     try {
-      // Use a direct query with the token - no auth needed for viewing
-      const { data: record, error: fetchError } = await supabase
-        .from('shared_passwords')
-        .select('*')
-        .eq('share_token', token)
-        .maybeSingle();
+      // Use the atomic RPC - validates expiry, view count, and increments atomically
+      const { data: rpcData, error: rpcError } = await supabase.rpc('view_shared_password', {
+        p_share_token: token,
+      });
 
-      if (fetchError || !record) {
-        setError('This link is invalid or has expired.');
+      if (rpcError || !rpcData || rpcData.length === 0) {
+        const msg = rpcError?.message || '';
+        if (msg.includes('expired')) {
+          setError('This share link has expired.');
+        } else if (msg.includes('limit')) {
+          setError('This link has reached its maximum number of views.');
+        } else {
+          setError('This link is invalid or has expired.');
+        }
         return;
       }
 
-      if (new Date(record.expires_at) < new Date()) {
-        setError('This share link has expired.');
-        return;
-      }
+      const encryptedData = rpcData[0].encrypted_data;
 
-      if (record.view_count >= record.max_views) {
-        setError('This link has reached its maximum number of views.');
-        return;
-      }
-
-      // Decrypt
+      // Decrypt - support both legacy (base64) and new (AES-GCM) formats
       try {
-        const decrypted = JSON.parse(atob(record.encrypted_data));
+        let decryptedJson: string;
+        if (isLegacyEncryption(encryptedData)) {
+          decryptedJson = decodeLegacy(encryptedData);
+        } else {
+          decryptedJson = await decryptData(encryptedData, token);
+        }
+        const decrypted = JSON.parse(decryptedJson);
         setData(decrypted);
-
-        // Increment view count
-        await supabase
-          .from('shared_passwords')
-          .update({ view_count: record.view_count + 1 })
-          .eq('id', record.id);
       } catch {
         setError('Failed to decrypt shared data.');
       }

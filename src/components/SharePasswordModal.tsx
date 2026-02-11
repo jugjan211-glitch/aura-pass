@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner';
 import { Share2, Copy, Check, Loader2, Clock, Eye } from 'lucide-react';
 import type { PasswordEntry } from '@/hooks/usePasswords';
+import { encryptData } from '@/lib/crypto';
 
 interface SharePasswordModalProps {
   open: boolean;
@@ -54,14 +55,14 @@ export function SharePasswordModal({ open, onClose, entry }: SharePasswordModalP
       };
       const expiresAt = new Date(Date.now() + (expiryMs[expiry] || 3600000));
 
-      // Encrypt data (simple base64 for demo; in production use AES)
+      // Encrypt data with AES-GCM using token as key material
       const data = JSON.stringify({
         title: entry.title,
         username: entry.username,
         password: entry.password,
         url: entry.url,
       });
-      const encrypted = btoa(data);
+      const encrypted = await encryptData(data, token);
 
       const { error } = await supabase.from('shared_passwords').insert({
         password_id: entry.id,

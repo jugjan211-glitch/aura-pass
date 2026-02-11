@@ -265,7 +265,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      view_shared_password: {
+        Args: { p_share_token: string }
+        Returns: {
+          encrypted_data: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
