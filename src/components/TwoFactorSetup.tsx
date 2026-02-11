@@ -79,36 +79,21 @@ export function TwoFactorSetup({ open, onClose }: TwoFactorSetupProps) {
     setIsVerifying(true);
 
     try {
-      const totp = new OTPAuth.TOTP({
-        issuer: 'SecureVault',
-        label: user.email || 'user',
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(secret),
+      // Validate TOTP server-side via edge function
+      const { data: result, error } = await supabase.functions.invoke('verify-totp', {
+        body: {
+          action: 'verify-and-enable',
+          code: verifyCode,
+          secret: secret,
+        },
       });
 
-      const delta = totp.validate({ token: verifyCode, window: 1 });
-
-      if (delta !== null) {
-        // Save to database
-        const { error } = await supabase
-          .from('totp_secrets')
-          .upsert({
-            user_id: user.id,
-            secret: secret,
-            is_enabled: true,
-          }, { onConflict: 'user_id' });
-
-        if (error) {
-          toast.error('Failed to enable 2FA');
-        } else {
-          setIsEnabled(true);
-          setStep('status');
-          toast.success('Two-factor authentication enabled!');
-        }
+      if (error || result?.error) {
+        toast.error(result?.error || 'Invalid code. Please try again.');
       } else {
-        toast.error('Invalid code. Please try again.');
+        setIsEnabled(true);
+        setStep('status');
+        toast.success('Two-factor authentication enabled!');
       }
     } finally {
       setIsVerifying(false);
@@ -118,12 +103,12 @@ export function TwoFactorSetup({ open, onClose }: TwoFactorSetupProps) {
 
   const handleDisable = async () => {
     if (!user) return;
-    const { error } = await supabase
-      .from('totp_secrets')
-      .update({ is_enabled: false })
-      .eq('user_id', user.id);
 
-    if (error) {
+    const { data: result, error } = await supabase.functions.invoke('verify-totp', {
+      body: { action: 'disable' },
+    });
+
+    if (error || result?.error) {
       toast.error('Failed to disable 2FA');
     } else {
       setIsEnabled(false);
