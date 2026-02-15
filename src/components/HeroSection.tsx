@@ -2,11 +2,11 @@ import { Shield, Lock, Key, Fingerprint } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <section className="relative pt-32 pb-16 overflow-hidden">
+    <section className="relative pt-24 pb-10 md:pt-32 md:pb-16 overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 gradient-hero" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-2xl" />
+      <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-32 h-32 md:w-64 md:h-64 bg-primary/10 rounded-full blur-2xl" />
 
       <div className="container mx-auto px-4 relative">
         <div className="max-w-3xl mx-auto text-center">
@@ -17,13 +17,13 @@ export function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-slide-up">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 animate-slide-up">
             Secure Your{' '}
             <span className="text-gradient">Digital Life</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in delay-200 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 animate-fade-in delay-200 max-w-2xl mx-auto px-2">
             Generate unbreakable passwords, store them safely, and access your vault from anywhere. 
             Your security starts here.
           </p>
