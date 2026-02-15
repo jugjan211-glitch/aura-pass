@@ -124,8 +124,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     // Apply accent color CSS variables
     const accent = accentColors[preferences.accentColor];
-    root.style.setProperty('--primary', `${accent.hue} ${accent.sat} ${accent.light}`);
-    root.style.setProperty('--ring', `${accent.hue} ${accent.sat} ${accent.light}`);
+    const h = accent.hue;
+    const s = accent.sat;
+    const l = accent.light;
+    root.style.setProperty('--primary', `${h} ${s} ${l}`);
+    root.style.setProperty('--ring', `${h} ${s} ${l}`);
+    
+    // Update accent/highlight colors based on selected accent
+    const lNum = parseInt(l);
+    root.style.setProperty('--accent', `${h} 50% ${preferences.theme === 'light' ? '94%' : preferences.theme === 'dark' ? '15%' : '10%'}`);
+    root.style.setProperty('--accent-foreground', `${h} ${s} ${preferences.theme === 'light' ? '26%' : '60%'}`);
+    
+    // Update gradient-primary dynamically
+    const gradientEnd = Math.min(lNum + 10, 65);
+    const hEnd = parseInt(h) + 4;
+    root.style.setProperty('--gradient-primary', `linear-gradient(135deg, hsl(${h} ${s} ${l}) 0%, hsl(${hEnd} 66% ${gradientEnd}%) 100%)`);
+    root.style.setProperty('--shadow-glow', `0 0 60px hsl(${h} ${s} ${l} / 0.2)`);
+    
+    // Update sidebar colors
+    root.style.setProperty('--sidebar-primary', `${h} ${s} ${l}`);
+    root.style.setProperty('--sidebar-ring', `${h} ${s} ${l}`);
     
     // Apply font size
     root.style.setProperty('--font-size-base', fontSizes[preferences.fontSize]);
