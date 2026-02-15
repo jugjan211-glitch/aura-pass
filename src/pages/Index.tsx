@@ -10,11 +10,12 @@ import { SecurityDashboard } from '@/components/SecurityDashboard';
 import { SecureNotes } from '@/components/SecureNotes';
 import { BreachChecker } from '@/components/BreachChecker';
 import { Footer } from '@/components/Footer';
+import { WelcomeModal } from '@/components/WelcomeModal';
 import { usePasswords, type PasswordEntry } from '@/hooks/usePasswords';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Key, FileText, ShieldAlert } from 'lucide-react';
+import { Key, FileText, ShieldAlert, Sparkles, Zap, Lock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +35,7 @@ export default function Index() {
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('passwords');
+  const [activeSection, setActiveSection] = useState<'generator' | 'actions' | 'vault'>('generator');
   const [shareEntry, setShareEntry] = useState<PasswordEntry | null>(null);
 
   const weakPasswordCount = passwords.filter(p => p.strength === 'weak').length;
@@ -97,57 +99,104 @@ export default function Index() {
         <HeroSection />
 
         <section className="container mx-auto px-4 pb-16">
-          <div className="grid lg:grid-cols-2 gap-6 mb-12">
-            <PasswordGenerator onPasswordGenerated={handlePasswordGenerated} />
-            <QuickActionsPanel 
-              onAddPassword={handleAddPassword}
-              passwordCount={passwords.length}
-              weakPasswordCount={weakPasswordCount}
-              favoriteCount={favoriteCount}
-            />
+          {/* Taskbar Navigation */}
+          <div className="glass rounded-2xl p-1.5 mb-8 flex gap-1 w-full sm:w-auto sm:inline-flex">
+            <button
+              onClick={() => setActiveSection('generator')}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+                activeSection === 'generator'
+                  ? 'gradient-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              Password Generator
+            </button>
+            <button
+              onClick={() => setActiveSection('actions')}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+                activeSection === 'actions'
+                  ? 'gradient-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              Quick Actions
+            </button>
+            <button
+              onClick={() => setActiveSection('vault')}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+                activeSection === 'vault'
+                  ? 'gradient-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              }`}
+            >
+              <Lock className="h-4 w-4" />
+              My Vault
+            </button>
           </div>
 
-          {passwords.length > 0 && (
-            <div className="mb-12">
-              <SecurityDashboard passwords={passwords} />
+          {/* Section Content */}
+          {activeSection === 'generator' && (
+            <div className="max-w-2xl animate-fade-in">
+              <PasswordGenerator onPasswordGenerated={handlePasswordGenerated} />
             </div>
           )}
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="glass h-12 p-1 w-full sm:w-auto">
-              <TabsTrigger value="passwords" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <Key className="h-4 w-4" /> Passwords
-              </TabsTrigger>
-              <TabsTrigger value="notes" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <FileText className="h-4 w-4" /> Secure Notes
-              </TabsTrigger>
-              <TabsTrigger value="breach" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
-                <ShieldAlert className="h-4 w-4" /> Breach Check
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="passwords" className="mt-6">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Your Vault</h2>
-              <PasswordList
-                passwords={passwords}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleFavorite={toggleFavorite}
-                onCopy={handleCopy}
-                onShare={handleShare}
+          {activeSection === 'actions' && (
+            <div className="max-w-2xl animate-fade-in">
+              <QuickActionsPanel
+                onAddPassword={handleAddPassword}
+                passwordCount={passwords.length}
+                weakPasswordCount={weakPasswordCount}
+                favoriteCount={favoriteCount}
               />
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="notes" className="mt-6">
-              <SecureNotes />
-            </TabsContent>
+          {activeSection === 'vault' && (
+            <div className="animate-fade-in space-y-8">
+              {passwords.length > 0 && (
+                <SecurityDashboard passwords={passwords} />
+              )}
 
-            <TabsContent value="breach" className="mt-6">
-              <div className="max-w-2xl">
-                <BreachChecker />
-              </div>
-            </TabsContent>
-          </Tabs>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="glass h-12 p-1 w-full sm:w-auto">
+                  <TabsTrigger value="passwords" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
+                    <Key className="h-4 w-4" /> Passwords
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
+                    <FileText className="h-4 w-4" /> Secure Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="breach" className="gap-2 flex-1 sm:flex-none data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground">
+                    <ShieldAlert className="h-4 w-4" /> Breach Check
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="passwords" className="mt-6">
+                  <h2 className="text-2xl font-bold text-foreground mb-6">Your Vault</h2>
+                  <PasswordList
+                    passwords={passwords}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleFavorite={toggleFavorite}
+                    onCopy={handleCopy}
+                    onShare={handleShare}
+                  />
+                </TabsContent>
+
+                <TabsContent value="notes" className="mt-6">
+                  <SecureNotes />
+                </TabsContent>
+
+                <TabsContent value="breach" className="mt-6">
+                  <div className="max-w-2xl">
+                    <BreachChecker />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
         </section>
       </main>
 
@@ -183,6 +232,7 @@ export default function Index() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <WelcomeModal />
     </div>
   );
 }
