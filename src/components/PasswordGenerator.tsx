@@ -167,7 +167,7 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
         </div>
 
         {/* Character Options */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50">
             <Label htmlFor="letters" className="text-sm cursor-pointer">Letters (A-z)</Label>
             <Switch
@@ -204,7 +204,7 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Button
           variant="gradient"
           size="lg"

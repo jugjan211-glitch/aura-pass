@@ -82,7 +82,7 @@ export function PasswordCard({ entry, onEdit, onDelete, onToggleFavorite, onCopy
           </div>
         </div>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <Button variant="ghost" size="icon-sm" onClick={handleCopy} className="text-muted-foreground hover:text-foreground">
             {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
           </Button>

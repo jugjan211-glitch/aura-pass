@@ -100,39 +100,39 @@ export default function Index() {
 
         <section className="container mx-auto px-4 pb-16">
           {/* Taskbar Navigation */}
-          <div className="glass rounded-2xl p-1.5 mb-8 flex gap-1 w-full sm:w-auto sm:inline-flex">
+          <div className="glass rounded-2xl p-1 md:p-1.5 mb-6 md:mb-8 flex gap-0.5 md:gap-1 w-full sm:w-auto sm:inline-flex">
             <button
               onClick={() => setActiveSection('generator')}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
                 activeSection === 'generator'
                   ? 'gradient-primary text-primary-foreground shadow-lg'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
               <Sparkles className="h-4 w-4" />
-              Password Generator
+              <span className="hidden sm:inline">Password </span>Generator
             </button>
             <button
               onClick={() => setActiveSection('actions')}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
                 activeSection === 'actions'
                   ? 'gradient-primary text-primary-foreground shadow-lg'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
               <Zap className="h-4 w-4" />
-              Quick Actions
+              <span className="hidden sm:inline">Quick </span>Actions
             </button>
             <button
               onClick={() => setActiveSection('vault')}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 flex-1 sm:flex-none justify-center ${
                 activeSection === 'vault'
                   ? 'gradient-primary text-primary-foreground shadow-lg'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
               <Lock className="h-4 w-4" />
-              My Vault
+              <span className="hidden sm:inline">My </span>Vault
             </button>
           </div>
 

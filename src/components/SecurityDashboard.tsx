@@ -61,7 +61,7 @@ export function SecurityDashboard({ passwords }: SecurityDashboardProps) {
       </div>
 
       {/* Security Score */}
-      <div className="flex items-center gap-6 mb-6 p-4 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 p-4 rounded-xl bg-secondary/30 border border-border/50">
         <div className="relative">
           <svg className="w-20 h-20 -rotate-90">
             <circle
@@ -87,7 +87,7 @@ export function SecurityDashboard({ passwords }: SecurityDashboardProps) {
             <span className={`text-xl font-bold ${scoreColor}`}>{stats.score}</span>
           </div>
         </div>
-        <div>
+        <div className="text-center sm:text-left">
           <p className="text-sm text-muted-foreground mb-1">Security Score</p>
           <p className={`text-lg font-semibold ${scoreColor}`}>{scoreLabel}</p>
           <p className="text-xs text-muted-foreground mt-1">

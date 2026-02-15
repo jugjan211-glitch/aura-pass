@@ -61,7 +61,7 @@ export function WelcomeModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-lg glass-strong p-0 overflow-hidden border-primary/20">
+      <DialogContent className="max-w-[95vw] sm:max-w-lg glass-strong p-0 overflow-hidden border-primary/20">
         <div className="relative">
           {/* Close button */}
           <Button
@@ -74,11 +74,11 @@ export function WelcomeModal() {
           </Button>
 
           {/* Header gradient */}
-          <div className="gradient-primary p-8 pb-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
-              <Icon className="h-8 w-8 text-primary-foreground" />
+          <div className="gradient-primary p-6 pb-10 md:p-8 md:pb-12 text-center">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <Icon className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-primary-foreground">{slide.title}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-primary-foreground">{slide.title}</h2>
           </div>
 
           {/* Content */}
