@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { PasswordGenerator } from '@/components/PasswordGenerator';
@@ -11,8 +11,10 @@ import { SecureNotes } from '@/components/SecureNotes';
 import { BreachChecker } from '@/components/BreachChecker';
 import { Footer } from '@/components/Footer';
 import { WelcomeModal } from '@/components/WelcomeModal';
+import { MasterPasswordModal } from '@/components/MasterPasswordModal';
 import { usePasswords, type PasswordEntry } from '@/hooks/usePasswords';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVaultKey } from '@/hooks/useVaultKey';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Key, FileText, ShieldAlert, Sparkles, Zap, Lock } from 'lucide-react';
@@ -27,10 +29,35 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Local-vault key marker key
+const LOCAL_VAULT_SETUP_KEY = 'local_vault_setup_done';
+
 export default function Index() {
   const { passwords, addPassword, updatePassword, deletePassword, markAsUsed, toggleFavorite } = usePasswords();
   const { user } = useAuth();
+  const { localKey, isLocalUnlocked, setLocalKey } = useVaultKey();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Show master password modal when user tries to add a local password without a key
+  const [masterPwMode, setMasterPwMode] = useState<'hidden' | 'setup' | 'unlock'>('hidden');
+  const hasLocalSetup = !!localStorage.getItem(LOCAL_VAULT_SETUP_KEY);
+
+  // Prompt for master password on mount if there are local passwords and key not yet set
+  useEffect(() => {
+    const stored = localStorage.getItem('securevault_passwords');
+    if (stored && !isLocalUnlocked) {
+      // There are local passwords stored – prompt to unlock
+      setMasterPwMode(hasLocalSetup ? 'unlock' : 'setup');
+    }
+  }, []);
+
+  const handleMasterPasswordSubmit = async (password: string) => {
+    const uid = user?.id ?? 'anonymous';
+    await setLocalKey(password, uid);
+    localStorage.setItem(LOCAL_VAULT_SETUP_KEY, '1');
+    setMasterPwMode('hidden');
+    toast.success('Local vault unlocked');
+  };
   const [editEntry, setEditEntry] = useState<PasswordEntry | null>(null);
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -233,6 +260,14 @@ export default function Index() {
         </AlertDialogContent>
       </AlertDialog>
       <WelcomeModal />
+
+      {/* Master password modal for local vault */}
+      <MasterPasswordModal
+        open={masterPwMode !== 'hidden'}
+        isSetup={masterPwMode === 'setup'}
+        onSubmit={handleMasterPasswordSubmit}
+        onCancel={masterPwMode === 'unlock' ? () => setMasterPwMode('hidden') : undefined}
+      />
     </div>
   );
 }
