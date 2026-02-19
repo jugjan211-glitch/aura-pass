@@ -120,6 +120,20 @@ Deno.serve(async (req) => {
 
     const { action, code, secret } = await req.json();
 
+    if (action === "check-status") {
+      // Returns whether 2FA is enabled for the authenticated user (no secret returned)
+      const { data: totpData } = await adminClient
+        .from("totp_secrets")
+        .select("is_enabled")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return new Response(
+        JSON.stringify({ enabled: totpData?.is_enabled ?? false }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Use service role for DB operations
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
