@@ -40,19 +40,31 @@ const slides = [
   },
 ];
 
+const WELCOME_SEEN_KEY = 'securevault_welcome_seen';
+
 export function WelcomeModal() {
   const [open, setOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    setOpen(true);
+    // Only show if the user has never seen it AND the vault isn't mid-unlock
+    const alreadySeen = localStorage.getItem(WELCOME_SEEN_KEY) === '1';
+    const vaultUnlockPending = !!localStorage.getItem('securevault_passwords');
+    if (!alreadySeen && !vaultUnlockPending) {
+      setOpen(true);
+    }
   }, []);
+
+  const dismiss = () => {
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+    setOpen(false);
+  };
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
-      setOpen(false);
+      dismiss();
     }
   };
 
@@ -60,7 +72,7 @@ export function WelcomeModal() {
   const Icon = slide.icon;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) dismiss(); }}>
       <DialogContent className="max-w-[95vw] sm:max-w-lg glass-strong p-0 overflow-hidden border-primary/20">
         <div className="relative">
           {/* Close button */}
@@ -68,7 +80,7 @@ export function WelcomeModal() {
             variant="ghost"
             size="icon-sm"
             className="absolute top-4 right-4 z-10 text-muted-foreground hover:text-foreground"
-            onClick={() => setOpen(false)}
+            onClick={dismiss}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -117,7 +129,7 @@ export function WelcomeModal() {
 
             <div className="flex gap-2">
               {currentSlide < slides.length - 1 && (
-                <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+                <Button variant="ghost" size="sm" onClick={dismiss}>
                   Skip
                 </Button>
               )}
