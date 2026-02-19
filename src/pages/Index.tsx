@@ -55,6 +55,8 @@ export default function Index() {
     const uid = user?.id ?? 'anonymous';
     await setLocalKey(password, uid);
     localStorage.setItem(LOCAL_VAULT_SETUP_KEY, '1');
+    // Mark welcome modal as seen so it never appears after vault unlock
+    localStorage.setItem('securevault_welcome_seen', '1');
     setMasterPwMode('hidden');
     toast.success('Local vault unlocked');
   };

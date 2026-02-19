@@ -50,6 +50,8 @@ export function usePasswords() {
   const [localPasswords, setLocalPasswords] = useState<PasswordEntry[]>([]);
   const [cloudPasswords, setCloudPasswords] = useState<PasswordEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Track whether we've performed the initial local load
+  const [localLoaded, setLocalLoaded] = useState(false);
 
   // Derive cloud key whenever user changes
   useEffect(() => {
@@ -58,7 +60,9 @@ export function usePasswords() {
     }
   }, [user, setCloudKey]);
 
-  // Load local passwords (decrypt on load)
+  // Load (and decrypt) local passwords whenever localKey changes.
+  // This covers both: initial mount (key may be null) AND after the user
+  // unlocks the vault by entering their master password.
   useEffect(() => {
     const loadLocal = async () => {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -71,7 +75,6 @@ export function usePasswords() {
               storageType: 'local' as const,
               createdAt: new Date(p.createdAt),
               lastUsed: p.lastUsed ? new Date(p.lastUsed) : undefined,
-              // Decrypt password field if key is available
               password: await safeDecrypt(p.password, localKey),
             }))
           );
@@ -79,11 +82,14 @@ export function usePasswords() {
         } catch (e) {
           console.error('Failed to parse local passwords:', e);
         }
+      } else {
+        setLocalPasswords([]);
       }
       setIsLoading(false);
+      setLocalLoaded(true);
     };
     loadLocal();
-    // Re-run when local key becomes available
+    // Re-run when local key becomes available (vault unlock)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localKey]);
 
@@ -127,17 +133,19 @@ export function usePasswords() {
     }
   };
 
-  // Persist local passwords (encrypt on save)
+  // Persist local passwords (encrypt on save).
+  // Only run after the initial local load so we don't wipe stored data
+  // with an empty array on the very first render.
   useEffect(() => {
-    if (isLoading) return;
+    if (!localLoaded) return;
 
     const persist = async () => {
-      // If we have a local key, encrypt each password field before storing
       const toStore = await Promise.all(
         localPasswords.map(async p => {
           let encPw = p.password;
-          if (localKey && p.password && !p.password.startsWith('🔒')) {
-            encPw = await encryptWithKey(p.password, localKey);
+          // Encrypt any plaintext password that isn't a sentinel value
+          if (localKey && encPw && !encPw.startsWith('🔒') && !isEncryptedBundle(encPw)) {
+            encPw = await encryptWithKey(encPw, localKey);
           }
           return { ...p, password: encPw };
         })
@@ -146,7 +154,7 @@ export function usePasswords() {
     };
 
     persist();
-  }, [localPasswords, localKey, isLoading]);
+  }, [localPasswords, localKey, localLoaded]);
 
   const passwords = [...cloudPasswords, ...localPasswords];
 
