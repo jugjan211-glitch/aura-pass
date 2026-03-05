@@ -46,14 +46,14 @@ export function Header() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
                   <Shield className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-success rounded-full border-2 border-background animate-pulse" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">SecureVault</h1>
-                <p className="text-[10px] text-muted-foreground -mt-0.5">Password Manager</p>
+                <h1 className="text-lg font-bold text-foreground tracking-tight">SecureVault</h1>
+                <p className="text-[10px] text-muted-foreground/70 -mt-0.5 font-medium tracking-wide uppercase">Password Manager</p>
               </div>
             </div>
 

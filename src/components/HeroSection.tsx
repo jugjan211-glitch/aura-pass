@@ -1,53 +1,45 @@
-import { Shield, Lock, Key, Fingerprint } from 'lucide-react';
+import { Shield, Lock, Key, Fingerprint, CheckCircle2 } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <section className="relative pt-24 pb-10 md:pt-32 md:pb-16 overflow-hidden">
+    <section className="relative pt-24 pb-12 md:pt-36 md:pb-20 overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 gradient-hero" />
-      <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-32 h-32 md:w-64 md:h-64 bg-primary/10 rounded-full blur-2xl" />
+      <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-32 h-32 md:w-72 md:h-72 bg-primary/10 rounded-full blur-2xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-[120px]" />
 
       <div className="container mx-auto px-4 relative">
         <div className="max-w-3xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-6 animate-fade-in">
-            <Lock className="h-4 w-4" />
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass border border-primary/20 text-accent-foreground text-sm font-medium mb-8 animate-fade-in shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
             End-to-end encrypted
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 animate-slide-up">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground mb-5 md:mb-7 animate-slide-up tracking-tight leading-[1.1]">
             Secure Your{' '}
             <span className="text-gradient">Digital Life</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8 animate-fade-in delay-200 max-w-2xl mx-auto px-2">
-            Generate unbreakable passwords, store them safely, and access your vault from anywhere. 
-            Your security starts here.
+          <p className="text-base md:text-lg text-muted-foreground mb-8 md:mb-10 animate-fade-in delay-200 max-w-xl mx-auto px-2 leading-relaxed">
+            Generate unbreakable passwords, store them safely, and access your vault from anywhere.
           </p>
 
           {/* Trust indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-6 animate-fade-in delay-300">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-success" />
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 animate-fade-in delay-300">
+            {[
+              { icon: Shield, label: '256-bit AES', color: 'text-success' },
+              { icon: Key, label: 'Zero Knowledge', color: 'text-primary' },
+              { icon: Fingerprint, label: 'Biometric Ready', color: 'text-accent-foreground' },
+            ].map(({ icon: Icon, label, color }) => (
+              <div key={label} className="flex items-center gap-2.5 text-muted-foreground glass rounded-full px-4 py-2 border border-border/50">
+                <Icon className={`h-4 w-4 ${color}`} />
+                <span className="text-sm font-medium">{label}</span>
               </div>
-              <span className="text-sm">256-bit AES</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Key className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-sm">Zero Knowledge</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                <Fingerprint className="h-4 w-4 text-accent-foreground" />
-              </div>
-              <span className="text-sm">Biometric Ready</span>
-            </div>
+            ))}
           </div>
         </div>
       </div>
